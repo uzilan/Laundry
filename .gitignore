@@ -1,0 +1,7 @@
+.classpath
+.project
+.idea
+.idea_modules
+.scala_dependencies
+target/
+.target
