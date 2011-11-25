@@ -3,7 +3,8 @@ SCAlable LAundry
 
 About
 -----
-This application will try to create a scalable application simulating a simple booking system, featuring:
+This application aims to create a scalable application simulating a simple laundry booking system, featuring:
+
 * [Scala] as the programming language
 * [sbt] as the build tool
 * [Vaadin] as the UI framework
