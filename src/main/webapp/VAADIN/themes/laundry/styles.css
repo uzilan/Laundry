@@ -1,0 +1,6 @@
+ @import url(../runo/styles.css);
+/* Using the old default theme (runo) as the basis for now */
+
+.green {
+    color: green;
+}

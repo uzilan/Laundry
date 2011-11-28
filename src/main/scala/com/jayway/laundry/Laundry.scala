@@ -1,88 +1,87 @@
 package com.jayway.laundry
 
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import com.vaadin.ui.Alignment
-import com.vaadin.ui.Window
 import com.vaadin.Application
-
+import DefaultData._
+import com.vaadin.ui.{Alignment, Window, Table}
 import vaadin.scala._
+import com.vaadin.event.ItemClickEvent
+
 
 /**
  * A simple Vaadin application which shows the booking screen and is the main class for this application.
  */
 class Laundry extends Application {
 
-  val startTime = 7 // how early in the day can the laundry be booked
-  val passLength = 3 // how long booking passes can be, in hours
-  val passesPerDay = 5 // how many booking passes per day
 
   val cal = Calendar.getInstance()
-  val sdf = new SimpleDateFormat("EE") // used for getting the name of the day
 
-  /** Initialize the Vaadin Window and panels */
+  /**Initialize the Vaadin Window and panels */
   def init(): Unit = {
     setMainWindow(new Window("SCAlable LAundry"))
-    val layout = new VerticalLayout(100 pct, 100 pct)
-    layout.add(createBookingPanel(createWeek()), alignment = Alignment.MIDDLE_CENTER)
-    getMainWindow().setContent(layout);
-  }
 
-  /** Create a week */
-  private def createWeek(): Seq[Day] = for (day <- 0 until 7) yield createDay()
+    val header = new Label("Please choose your name and laundry booking time")
 
-  /** Create a day */
-  private def createDay(): Day = new Day(for (pass <- 0 until passesPerDay) yield createPass(pass))
+    val tenantChooser = new ComboBox()
+    defaultTenants foreach {
+      tenant => tenantChooser.addItem(tenant.name)
+    }
 
-  /** Create a pass */
-  private def createPass(pass: Int) = new Pass(startTime + passLength * pass, startTime + passLength + passLength * pass)
+    // create the booking table add a column for each day
+    val bookingTable = new Table()
+    defaultDays foreach {
+      bookingTable.addContainerProperty(_, classOf[BookingPanel], null)
+    }
 
-  /** Create the booking panel */
-  private def createBookingPanel(week: Seq[Day]): Panel = {
-    val panel = new Panel()
-    panel.setLayout(
-      new HorizontalLayout {
-        add(createWeekPanel(createWeek), alignment = Alignment.MIDDLE_CENTER)
-      })
-    panel
-  }
+    // a layout containing a booking
+    case class BookingPanel(booking: Booking) extends HorizontalLayout {
+      add(new Label(booking.toString))
+      //setStyleName("green")
+    }
 
-  /** Create a week panel */
-  private def createWeekPanel(week: Seq[Day]): Panel = {
-    val panel = new Panel(caption = "Week")
-    panel.setLayout(
-      new HorizontalLayout {
-        (0 until week.size) foreach { day =>
-          add(createDayPanel(week(day), day))
-        }
-      })
-    panel
-  }
-  /** Create a day panel */
-  private def createDayPanel(day: Day, dayNo: Int): Panel = {
-    val panel = new Panel(caption = getDayName(dayNo))
-    panel.setLayout(
-      new VerticalLayout {
-        (0 until passesPerDay) foreach { pass =>
-          add(createPassPanel(day.passes(pass)))
-        }
-      })
-    panel
-  }
+    // to populate the table, add a whole row (each day's bookings for one pass) at a time
+    // transfer each booking data row into booking panels and add them as a row
+    defaultWeekBookings foreach {
+      bookings =>
+        val bookingsPanels = bookings map (booking => new BookingPanel(booking))
+        bookingTable.addItem(bookingsPanels.toArray, bookingsPanels(0).booking.pass.from)
+    }
 
-  /** Return a day's name given a day number (0 = Monday, 1 = Sunday etc.)  */
-  private def getDayName(day: Int): String = {
-    cal.set(Calendar.DAY_OF_WEEK, (day + 2) % 7)
-    sdf.format(cal.getTime())
-  }
+    // Allow selecting items from the table.
+    bookingTable.setSelectable(true);
 
-  /** Create a pass panel */
-  private def createPassPanel(pass: Pass): Panel = {
-    val panel = new Panel()
-    panel.setLayout(new HorizontalLayout {
-      add(new Label(pass.toString))
+    // Send changes in selection immediately to server.
+    bookingTable.setImmediate(true);
+
+    bookingTable.addActionHandler(new Action.Handler {
+
     })
-    panel
+
+
+
+    bookingTable.addListener(new ItemClickEvent.ItemClickListener {
+
+      def itemClick(event: ItemClickEvent) {
+        val item = event.getItem
+        val itemId = event.getItemId
+        val propertyId = event.getPropertyId
+
+        println(String.format("item: %s, itemId: %s, propertyId: %s", item, itemId, propertyId))
+      }
+    })
+
+    val centerPanel = new VerticalLayout(600 px, 370 px) {
+      Seq(header, tenantChooser, bookingTable) foreach (add(_, alignment = Alignment.MIDDLE_LEFT))
+    }
+
+    val windowLayout = new VerticalLayout(100 pct, 100 pct) {
+      add(centerPanel, alignment = Alignment.MIDDLE_CENTER)
+    }
+
+    getMainWindow.setContent(windowLayout);
+
+    setTheme("laundry")
   }
+
 
 }
