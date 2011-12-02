@@ -4,3 +4,12 @@
 .green {
     color: green;
 }
+
+.v-table-cell-content-cellcolored:hover{
+    background: #C3D9EE;
+    color: red;
+}
+
+.v-table-row-odd  {
+    background-color: #F6F7F7;
+}

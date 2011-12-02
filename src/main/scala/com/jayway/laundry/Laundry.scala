@@ -6,6 +6,7 @@ import DefaultData._
 import com.vaadin.ui.{Alignment, Window, Table}
 import vaadin.scala._
 import com.vaadin.event.ItemClickEvent
+import com.vaadin.ui.Table.CellStyleGenerator
 
 
 /**
@@ -30,7 +31,8 @@ class Laundry extends Application {
     // create the booking table add a column for each day
     val bookingTable = new Table()
     defaultDays foreach {
-      bookingTable.addContainerProperty(_, classOf[BookingPanel], null)
+      day =>
+        bookingTable.addContainerProperty(day._2, classOf[BookingPanel], null, day._1, null, null)
     }
 
     // a layout containing a booking
@@ -39,24 +41,22 @@ class Laundry extends Application {
       //setStyleName("green")
     }
 
+
     // to populate the table, add a whole row (each day's bookings for one pass) at a time
     // transfer each booking data row into booking panels and add them as a row
     defaultWeekBookings foreach {
       bookings =>
-        val bookingsPanels = bookings map (booking => new BookingPanel(booking))
-        bookingTable.addItem(bookingsPanels.toArray, bookingsPanels(0).booking.pass.from)
+      //val bookingsPanels = bookings map (booking => new BookingPanel(booking))
+      //bookingTable.addItem(bookingsPanels.toArray, bookingsPanels(0).booking.pass.from)
+        bookingTable.addItem(Seq("1", "2", "3", "4", "5", "6", "7"))
     }
-
-    // Allow selecting items from the table.
-    bookingTable.setSelectable(true);
 
     // Send changes in selection immediately to server.
     bookingTable.setImmediate(true);
 
-    bookingTable.addActionHandler(new Action.Handler {
-
-    })
-
+    bookingTable.setCellStyleGenerator(new CellStyleGenerator {
+      override def getStyle(itemId: AnyRef, propertyId: AnyRef): String = "cellcolored"
+    });
 
 
     bookingTable.addListener(new ItemClickEvent.ItemClickListener {
@@ -67,6 +67,9 @@ class Laundry extends Application {
         val propertyId = event.getPropertyId
 
         println(String.format("item: %s, itemId: %s, propertyId: %s", item, itemId, propertyId))
+
+        val bookingPanels = item.asInstanceOf[Seq[BookingPanel]]
+        bookingPanels(event.getPropertyId.asInstanceOf[Int]).setStyleName("green")
       }
     })
 

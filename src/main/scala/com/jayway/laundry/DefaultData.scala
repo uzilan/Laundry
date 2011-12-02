@@ -15,7 +15,7 @@ object DefaultData {
     Tenant(_)
   }
 
-  lazy val defaultDays = Seq("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+  lazy val defaultDays = Seq(("Sunday", 0), ("Monday", 1), ("Tuesday", 2), ("Wednesday", 3), ("Thursday", 4), ("Friday", 5), ("Saturday", 6), ("Sunday", 7))
 
   lazy val defaultWeekBookings: Seq[Seq[Booking]] = {
     for (x <- 0 until passesPerDay) yield
