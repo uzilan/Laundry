@@ -1,12 +1,11 @@
 package com.jayway.laundry
 
-import java.util.Calendar
 import com.vaadin.Application
 import DefaultData._
 import com.vaadin.ui.{Alignment, Window, Table}
-import vaadin.scala._
 import com.vaadin.event.ItemClickEvent
 import com.vaadin.ui.Table.CellStyleGenerator
+import vaadin.scala._
 
 
 /**
@@ -14,22 +13,25 @@ import com.vaadin.ui.Table.CellStyleGenerator
  */
 class Laundry extends Application {
 
-
-  val cal = Calendar.getInstance()
-
-  /**Initialize the Vaadin Window and panels */
+  // Initialize the Vaadin Window and panels
   def init(): Unit = {
+
+    // create the main window
     setMainWindow(new Window("SCAlable LAundry"))
 
+    // create a header
     val header = new Label("Please choose your name and laundry booking time")
 
-    val tenantChooser = new ComboBox()
+    // create a combobox with the tenants' names
+    val tenantChooser = new ComboBox
     defaultTenants foreach {
       tenant => tenantChooser.addItem(tenant.name)
     }
 
-    // create the booking table add a column for each day
-    val bookingTable = new Table()
+    // create the booking table
+    val bookingTable = new Table
+
+    // add a column for each day
     defaultDays foreach {
       day =>
         bookingTable.addContainerProperty(day._2, classOf[BookingPanel], null, day._1, null, null)
@@ -38,27 +40,30 @@ class Laundry extends Application {
     // a layout containing a booking
     case class BookingPanel(booking: Booking) extends HorizontalLayout {
       add(new Label(booking.toString))
+
+      // required to allow similar cells in the table
+      override def equals(other: Any): Boolean = false
+
       //setStyleName("green")
     }
 
-
-    // to populate the table, add a whole row (each day's bookings for one pass) at a time
-    // transfer each booking data row into booking panels and add them as a row
+    // to populate the table, add a whole row (each day's bookings for one pass) at a time,
+    // transfer each booking data row into booking panels array and add them as a row
     defaultWeekBookings foreach {
       bookings =>
-      //val bookingsPanels = bookings map (booking => new BookingPanel(booking))
-      //bookingTable.addItem(bookingsPanels.toArray, bookingsPanels(0).booking.pass.from)
-        bookingTable.addItem(Seq("1", "2", "3", "4", "5", "6", "7"))
+        val bookingsPanels = bookings map (new BookingPanel(_))
+        bookingTable.addItem(bookingsPanels.toArray, bookingsPanels(0).booking.pass.from)
     }
 
     // Send changes in selection immediately to server.
     bookingTable.setImmediate(true);
 
+    // change the cell generator to allow different cell styles
     bookingTable.setCellStyleGenerator(new CellStyleGenerator {
       override def getStyle(itemId: AnyRef, propertyId: AnyRef): String = "cellcolored"
     });
 
-
+    // listen to table clicks
     bookingTable.addListener(new ItemClickEvent.ItemClickListener {
 
       def itemClick(event: ItemClickEvent) {
@@ -73,17 +78,22 @@ class Laundry extends Application {
       }
     })
 
+    // add components in a panel
     val centerPanel = new VerticalLayout(600 px, 370 px) {
       Seq(header, tenantChooser, bookingTable) foreach (add(_, alignment = Alignment.MIDDLE_LEFT))
     }
 
+    // add the panel a layout
     val windowLayout = new VerticalLayout(100 pct, 100 pct) {
       add(centerPanel, alignment = Alignment.MIDDLE_CENTER)
     }
 
+    // add the layout in the main window
     getMainWindow.setContent(windowLayout);
 
+    // set the theme
     setTheme("laundry")
+
   }
 
 
