@@ -38,7 +38,7 @@ class Laundry extends Application {
     }
 
     // a layout containing a booking
-    case class BookingPanel(booking: Booking) extends HorizontalLayout {
+    case class BookingPanel(booking: Booking) extends HorizontalLayout(100 pct, 100 pct) {
       add(new Label(booking.toString))
 
       // required to allow similar cells in the table
@@ -79,7 +79,7 @@ class Laundry extends Application {
     })
 
     // add components in a panel
-    val centerPanel = new VerticalLayout(600 px, 370 px) {
+    val centerPanel = new VerticalLayout(650 px, 300 px) {
       Seq(header, tenantChooser, bookingTable) foreach (add(_, alignment = Alignment.MIDDLE_LEFT))
     }
 
